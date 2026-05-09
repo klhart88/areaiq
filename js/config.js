@@ -17,7 +17,7 @@
 export const CENSUS_API_KEY = 'f0b219afaa069e9f4a46f74010988cc11755d459';
 
 // Mapbox key (placeholder — we'll add this in a later step)
-export const MAPBOX_KEY = '';
+export const MAPBOX_KEY = 'pk.eyJ1Ijoia2xoYXJ0ODgiLCJhIjoiY21veW05Mml5MG12cDR1b2c0bGphOXIxbSJ9.RvPvcZUHZ88142do6lEKAQ';
 
 // Google Maps key (placeholder — we'll add this in a later step)
 export const GOOGLE_MAPS_KEY = '';

@@ -9,7 +9,7 @@
 
 import { geocodeAddress } from './geocode.js';
 import { fetchDemographics } from './demographics.js';
-
+import { renderMap } from './map.js';
 // ---------- DOM elements ----------
 // We grab references to the elements we'll
 // interact with so we don't repeatedly query.
@@ -86,9 +86,9 @@ function showError(message) {
 }
 
 function showLocationResults(location) {
-  // Build a definition list of all the location data
-  // dt = "term" (label), dd = "description" (value)
   resultsSection.innerHTML = `
+    <div id="address-map" class="map-container"></div>
+
     <h2>Address Found</h2>
     <dl class="result-grid">
       <dt>Matched address</dt>
@@ -106,11 +106,10 @@ function showLocationResults(location) {
       <dt>Coordinates</dt>
       <dd>${location.lat.toFixed(6)}, ${location.lng.toFixed(6)}</dd>
     </dl>
-
-    <p class="placeholder" style="margin-top: var(--space-md);">
-      ✅ Foundation working. Demographics, schools, and other features will appear here as they're built.
-    </p>
   `;
+
+  // Render the map into the empty div we just created
+  renderMap('address-map', location);
 }
 
 
