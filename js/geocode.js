@@ -16,6 +16,7 @@
 
 import { API_ENDPOINTS, CACHE_TTL } from './config.js';
 import { cacheGet, cacheSet } from './cache.js';
+import { getCensusGeographies } from './census-block.js';
 
 
 // Map of full state name → 2-letter abbreviation.
@@ -94,9 +95,7 @@ export async function geocodeAddress(rawAddress) {
   // sometimes 'town', sometimes 'village', sometimes 'hamlet'
   const city = addr.city || addr.town || addr.village || addr.hamlet || addr.suburb || '';
 
-  // Build the LocationContext object
-  // (censusTract and countyFips will be filled in by a later
-  // FCC Census Block API call when we add demographics)
+  // Build the initial LocationContext from Nominatim
   const location = {
     address: match.display_name,
     lat: parseFloat(match.lat),
@@ -106,11 +105,23 @@ export async function geocodeAddress(rawAddress) {
     city: city,
     zip: addr.postcode || '',
     countyName: (addr.county || '').replace(/ County$/, ''),
-    countyFips: null,        // to be added in next session
-    censusTract: null         // to be added in next session
+    countyFips: null,
+    censusTract: null,
+    stateFips: null
   };
 
-  // Cache and return
+  // Enrich with Census geographies via FCC API
+  // (this is a separate request; if it fails, we still return
+  // the geocoded result so the rest of the app keeps working)
+  const geographies = await getCensusGeographies(location.lat, location.lng);
+  if (geographies) {
+    location.censusTract = geographies.censusTract;
+    location.countyFips = geographies.countyFips;
+    location.stateFips = geographies.stateFips;
+    if (geographies.countyName) location.countyName = geographies.countyName;
+  }
+
+  // Cache and return the enriched result
   cacheSet(cacheKey, location, CACHE_TTL.geocode);
   return location;
 }
