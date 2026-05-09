@@ -1,0 +1,233 @@
+/* ============================================
+   AreaIQ by Hart — Stylesheet v0.1
+   ============================================ */
+
+/* ---------- Design tokens ----------
+   "Tokens" are reusable values defined once
+   and used throughout the file. If we want to
+   change the brand color later, we change it
+   here once and it updates everywhere.
+*/
+:root {
+  /* Brand colors (matched to Hart brand) */
+  --color-primary: #c8102e;        /* Hart red — primary brand color */
+  --color-primary-light: #e03040;  /* Lighter red for hover/highlights */
+  --color-primary-dark: #a00d24;   /* Darker red for pressed/active states */
+  --color-text: #1a0808;           /* Hart black — warm, slightly red-tinted */
+  --color-text-muted: #6b5555;     /* Warm gray for secondary text */
+
+  /* Surfaces and borders */
+  --color-bg: #fafafa;             /* Subtle off-white page background */
+  --color-card: #ffffff;           /* Pure white card surfaces */
+  --color-border: #e8e0e0;         /* Soft warm border tint */
+
+  /* Spacing scale */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+
+  /* Misc */
+  --radius: 0.5rem;
+  --shadow: 0 1px 3px rgba(26, 8, 8, 0.08);
+}
+
+/* ---------- Base reset ----------
+   Browsers have inconsistent default styles.
+   We zero out a few things so we control the
+   layout from a clean baseline.
+*/
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Header ---------- */
+header {
+  background-color: var(--color-card);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-md) var(--space-lg);
+  text-align: center;
+}
+
+header h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: var(--space-xs);
+}
+
+header h1 .brand-by {
+  color: var(--color-text-muted);
+  font-weight: 400;
+  font-size: 1.25rem;
+}
+
+.tagline {
+  color: var(--color-text-muted);
+  font-size: 1rem;
+}
+
+/* ---------- Main content area ---------- */
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-md);
+}
+
+/* ---------- Search section ---------- */
+#search-section {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow);
+  margin-bottom: var(--space-lg);
+}
+
+#search-section label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: var(--space-xs);
+  color: var(--color-text);
+}
+
+#address-input {
+  width: 100%;
+  padding: var(--space-sm);
+  font-size: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-sm);
+  font-family: inherit;
+}
+
+#address-input:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -1px;
+  border-color: var(--color-primary);
+}
+
+#search-button {
+  width: 100%;
+  padding: var(--space-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+#search-button:hover {
+  background-color: var(--color-primary-light);
+}
+
+#search-button:active {
+  transform: translateY(1px);
+}
+
+/* ---------- Results section ---------- */
+#results-section {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow);
+  min-height: 200px;
+}
+
+.placeholder {
+  color: var(--color-text-muted);
+  text-align: center;
+  font-style: italic;
+}
+
+/* Used to display structured data once we have results */
+.result-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-xs) var(--space-md);
+  font-size: 0.9375rem;
+}
+
+.result-grid dt {
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.result-grid dd {
+  color: var(--color-text);
+  word-break: break-word;
+}
+
+/* ---------- Status messages ---------- */
+.message {
+  padding: var(--space-sm);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-sm);
+  font-size: 0.9375rem;
+}
+
+.message-loading {
+  background-color: #f5f5f5;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.message-error {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* ---------- Footer ---------- */
+footer {
+  text-align: center;
+  padding: var(--space-md);
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-card);
+}
+
+/* ---------- Mobile responsive adjustments ---------- */
+@media (max-width: 480px) {
+  header {
+    padding: var(--space-md) var(--space-sm);
+  }
+
+  header h1 {
+    font-size: 1.5rem;
+  }
+
+  main {
+    padding: var(--space-md) var(--space-sm);
+  }
+
+  #search-section,
+  #results-section {
+    padding: var(--space-md);
+  }
+}
