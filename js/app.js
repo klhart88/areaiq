@@ -11,6 +11,7 @@ import { geocodeAddress } from './geocode.js';
 import { fetchDemographics } from './demographics.js';
 import { renderMap } from './map.js';
 import { fetchCommuteEstimate } from './commute.js';
+import { fetchSchoolInfo } from './schools.js';
 // ---------- DOM elements ----------
 // We grab references to the elements we'll
 // interact with so we don't repeatedly query.
@@ -55,8 +56,7 @@ async function handleSearch() {
     currentLocation = location;
     showLocationResults(location);
 
-    // Step 2: Fetch demographics in the background
-    // (the address card is already showing while this loads)
+    // Step 2: Fetch demographics
     if (location.censusTract) {
       try {
         const demographics = await fetchDemographics(location);
@@ -67,11 +67,18 @@ async function handleSearch() {
     } else {
       appendErrorBlock('Demographics unavailable: address could not be matched to a Census tract.');
     }
+
+    // Step 3: Fetch school district info
+    try {
+      const schoolInfo = await fetchSchoolInfo(location);
+      appendSchoolResults(schoolInfo);
+    } catch (schoolErr) {
+      appendErrorBlock('School information unavailable: ' + schoolErr.message);
+    }
   } catch (err) {
     showError(err.message);
   }
 }
-
 
 // ---------- Display helpers ----------
 // These functions build HTML and inject it
@@ -271,6 +278,59 @@ function showCommuteResults(commute) {
     </div>
     <p class="data-source">Source: Mapbox Directions API · Drive times approximate</p>
   `;
+}
+function appendSchoolResults(schoolInfo) {
+  const block = document.createElement('section');
+  block.className = 'feature-block';
+
+  // Out-of-state user
+  if (!schoolInfo.inServiceArea) {
+    block.innerHTML = `
+      <h2>School District</h2>
+      <p class="placeholder">${escapeHtml(schoolInfo.message)}</p>
+    `;
+    resultsSection.appendChild(block);
+    return;
+  }
+
+  // In-state but lookup failed
+  if (schoolInfo.error) {
+    block.innerHTML = `
+      <h2>School District</h2>
+      <div class="message message-error">${escapeHtml(schoolInfo.error)}</div>
+    `;
+    resultsSection.appendChild(block);
+    return;
+  }
+
+  // Successful district lookup
+block.innerHTML = `
+  <h2>School District</h2>
+  <dl class="result-grid">
+    <dt>Assigned district</dt>
+    <dd>${escapeHtml(schoolInfo.districtName)}</dd>
+
+    <dt>District ID</dt>
+    <dd>${escapeHtml(schoolInfo.districtId)}</dd>
+  </dl>
+
+  <div class="school-links">
+  <p class="school-links-label">Continue your research:</p>
+  <a class="school-link-button" href="${schoolInfo.greatSchoolsUrl}" target="_blank" rel="noopener noreferrer">
+    📊 Test scores on GreatSchools ↗
+  </a>
+  <a class="school-link-button" href="${schoolInfo.districtSearchUrl}" target="_blank" rel="noopener noreferrer">
+    🏫 District website (calendars, enrollment, contact) ↗
+  </a>
+</div>
+
+  <p class="school-disclaimer">
+    School test score reporting formats vary by district and state; linking to the district's site for best viewing experience. Return to this window to complete other elements of your research.
+  </p>
+
+  <p class="data-source">Source: NCES EDGE School District Boundaries (2025)</p>
+`;
+  resultsSection.appendChild(block);
 }
 function escapeHtml(unsafe) {
   if (unsafe == null) return '';
