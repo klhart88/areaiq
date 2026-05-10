@@ -422,3 +422,117 @@ footer {
     text-align: center;
   }
 }
+/* ---------- Tax calculator UI ---------- */
+.tax-source-inline {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.tax-calculator {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  background-color: var(--color-bg);
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+}
+
+.tax-calculator-label {
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+  color: var(--color-text);
+  font-size: 0.9375rem;
+}
+
+.tax-calculator-form {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.tax-input-wrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.tax-input-prefix {
+  position: absolute;
+  left: var(--space-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.tax-input {
+  width: 100%;
+  padding: var(--space-sm) var(--space-sm) var(--space-sm) calc(var(--space-sm) + 1.25rem);
+  font-size: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-family: inherit;
+}
+
+.tax-input:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -1px;
+  border-color: var(--color-primary);
+}
+
+.tax-button {
+  padding: var(--space-sm) var(--space-md);
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.tax-button:hover {
+  background-color: var(--color-primary-light);
+}
+
+@media (max-width: 480px) {
+  .tax-calculator-form {
+    flex-direction: column;
+  }
+}
+
+.tax-calculation {
+  margin-top: var(--space-sm);
+  padding: var(--space-md);
+  background-color: var(--color-card);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--color-primary);
+}
+
+.tax-calc-headline {
+  font-size: 1.0625rem;
+  margin-bottom: var(--space-xs);
+}
+
+.tax-calc-headline strong {
+  color: var(--color-primary);
+  font-size: 1.25rem;
+}
+
+.tax-calc-detail {
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-xs);
+}
+
+.tax-calc-formula {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  font-family: 'Courier New', monospace;
+  margin-top: var(--space-xs);
+  padding-top: var(--space-xs);
+  border-top: 1px solid var(--color-border);
+}

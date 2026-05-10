@@ -12,6 +12,7 @@ import { fetchDemographics } from './demographics.js';
 import { renderMap } from './map.js';
 import { fetchCommuteEstimate } from './commute.js';
 import { fetchSchoolInfo } from './schools.js';
+import { fetchTaxInfo } from './tax.js';
 // ---------- DOM elements ----------
 // We grab references to the elements we'll
 // interact with so we don't repeatedly query.
@@ -56,10 +57,11 @@ async function handleSearch() {
     currentLocation = location;
     showLocationResults(location);
 
-    // Step 2: Fetch demographics
+    // Step 2: Fetch demographics (and remember for tax estimate)
+    let demographics = null;
     if (location.censusTract) {
       try {
-        const demographics = await fetchDemographics(location);
+        demographics = await fetchDemographics(location);
         appendDemographicsResults(demographics);
       } catch (demoErr) {
         appendErrorBlock('Demographics unavailable: ' + demoErr.message);
@@ -75,11 +77,19 @@ async function handleSearch() {
     } catch (schoolErr) {
       appendErrorBlock('School information unavailable: ' + schoolErr.message);
     }
+
+    // Step 4: Fetch property tax info
+    try {
+      const taxInfo = await fetchTaxInfo(location, demographics);
+      appendTaxResults(taxInfo);
+    } catch (taxErr) {
+      appendErrorBlock('Property tax info unavailable: ' + taxErr.message);
+    }
+
   } catch (err) {
     showError(err.message);
   }
 }
-
 // ---------- Display helpers ----------
 // These functions build HTML and inject it
 // into the results section.
@@ -331,6 +341,134 @@ block.innerHTML = `
   <p class="data-source">Source: NCES EDGE School District Boundaries (2025)</p>
 `;
   resultsSection.appendChild(block);
+}
+function appendTaxResults(taxInfo) {
+  const block = document.createElement('section');
+  block.className = 'feature-block';
+
+  // Out-of-state user
+  if (!taxInfo.inServiceArea) {
+    block.innerHTML = `
+      <h2>Property Tax Estimate</h2>
+      <p class="placeholder">${escapeHtml(taxInfo.message)}</p>
+    `;
+    resultsSection.appendChild(block);
+    return;
+  }
+
+  // In-state but lookup failed
+  if (taxInfo.error) {
+    block.innerHTML = `
+      <h2>Property Tax Estimate</h2>
+      <div class="message message-error">${escapeHtml(taxInfo.error)}</div>
+    `;
+    resultsSection.appendChild(block);
+    return;
+  }
+
+  // Build the area median row (if we have it)
+  const areaMedianRow = taxInfo.areaMedianTax
+    ? `
+      <dt>Area median tax</dt>
+      <dd>${formatCurrency(taxInfo.areaMedianTax)}/year</dd>
+    `
+    : '';
+
+  // Build the user-input section
+  const userInputSection = `
+    <div class="tax-calculator">
+      <p class="tax-calculator-label">
+        Get a more specific estimate by entering a target home value:
+      </p>
+      <div class="tax-calculator-form">
+        <div class="tax-input-wrapper">
+          <span class="tax-input-prefix">$</span>
+          <input
+            type="number"
+            id="tax-home-value"
+            class="tax-input"
+            placeholder="350,000"
+            min="0"
+            step="1000"
+          >
+        </div>
+        <button id="tax-calculate-button" type="button" class="tax-button">Calculate</button>
+      </div>
+      <div id="tax-calculation-result"></div>
+    </div>
+  `;
+
+  block.innerHTML = `
+    <h2>Property Tax Estimate</h2>
+    <dl class="result-grid">
+      <dt>State</dt>
+      <dd>${escapeHtml(taxInfo.state)}</dd>
+
+      <dt>Effective tax rate</dt>
+      <dd>${escapeHtml(taxInfo.effectiveRatePercent)} <span class="tax-source-inline">(as of ${escapeHtml(taxInfo.rateAsOf)})</span></dd>
+
+      ${areaMedianRow}
+
+      <dt>Billing schedule</dt>
+      <dd>${escapeHtml(taxInfo.billingDescription)}</dd>
+    </dl>
+
+    ${userInputSection}
+
+    <p class="school-disclaimer">
+      ${escapeHtml(taxInfo.homesteadDeduction)}
+    </p>
+
+    <p class="data-source">
+      Source: ${escapeHtml(taxInfo.rateSource)} · ${escapeHtml(taxInfo.verificationSource)}
+    </p>
+  `;
+  resultsSection.appendChild(block);
+
+  // Wire up the calculator button after the HTML is in the DOM
+  const calcButton = document.getElementById('tax-calculate-button');
+  const valueInput = document.getElementById('tax-home-value');
+  const resultDiv = document.getElementById('tax-calculation-result');
+
+  function calculate() {
+    const valueText = valueInput.value.trim();
+    const value = parseInt(valueText, 10);
+
+    if (!valueText || isNaN(value) || value <= 0) {
+      resultDiv.innerHTML = `
+        <div class="message message-error">
+          Please enter a valid home value greater than zero.
+        </div>
+      `;
+      return;
+    }
+
+    const annual = Math.round(value * taxInfo.effectiveRate);
+    const monthly = Math.round(annual / 12);
+    const semiAnnual = Math.round(annual / 2);
+
+    resultDiv.innerHTML = `
+      <div class="tax-calculation">
+        <div class="tax-calc-headline">
+          Estimated annual tax: <strong>${formatCurrency(annual)}</strong>
+        </div>
+        <div class="tax-calc-detail">
+          ≈ ${formatCurrency(semiAnnual)} per installment (May and November)
+          · ${formatCurrency(monthly)}/month if escrowed
+        </div>
+        <div class="tax-calc-formula">
+          ${formatCurrency(value)} × ${taxInfo.effectiveRatePercent} = ${formatCurrency(annual)}
+        </div>
+      </div>
+    `;
+  }
+
+  calcButton.addEventListener('click', calculate);
+  valueInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      calculate();
+    }
+  });
 }
 function escapeHtml(unsafe) {
   if (unsafe == null) return '';

@@ -23,14 +23,15 @@ const ACS_VARIABLES = {
   'B01002_001E': 'medianAge',
   'B25077_001E': 'medianHomeValue',
   'B25064_001E': 'medianGrossRent',
-  'B15003_022E': 'bachelorsCount',     // Bachelor's degree
-  'B15003_023E': 'mastersCount',        // Master's degree
-  'B15003_024E': 'professionalCount',   // Professional degree
-  'B15003_025E': 'doctorateCount',      // Doctorate degree
-  'B15003_001E': 'educationTotalPop',   // Total population 25+ for ratio calc
+  'B15003_022E': 'bachelorsCount',
+  'B15003_023E': 'mastersCount',
+  'B15003_024E': 'professionalCount',
+  'B15003_025E': 'doctorateCount',
+  'B15003_001E': 'educationTotalPop',
   'B25003_001E': 'totalHouseholds',
   'B25003_002E': 'ownerOccupied',
-  'B25003_003E': 'renterOccupied'
+  'B25003_003E': 'renterOccupied',
+  'B25103_001E': 'medianPropertyTax'
 };
 
 
@@ -102,14 +103,15 @@ export async function fetchDemographics(location) {
 
   // Compute derived stats and structure the result
   const result = {
-    population: raw.totalPopulation,
-    medianAge: raw.medianAge,
-    medianIncome: raw.medianHouseholdIncome,
-    medianHomeValue: raw.medianHomeValue,
-    medianRent: raw.medianGrossRent,
-    bachelorsOrHigherPercent: computeEducationPercent(raw),
-    ownerOccupiedPercent: computeOwnershipPercent(raw)
-  };
+  population: raw.totalPopulation,
+  medianAge: raw.medianAge,
+  medianIncome: raw.medianHouseholdIncome,
+  medianHomeValue: raw.medianHomeValue,
+  medianRent: raw.medianGrossRent,
+  bachelorsOrHigherPercent: computeEducationPercent(raw),
+  ownerOccupiedPercent: computeOwnershipPercent(raw),
+  medianPropertyTax: raw.medianPropertyTax
+};
 
   // Cache and return
   cacheSet(cacheKey, result, CACHE_TTL.demographics);
