@@ -589,3 +589,117 @@ footer {
     text-align: center;
   }
 }
+/* ---------- Venue tabs ---------- */
+.venue-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+
+.venue-tab {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.venue-tab:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.venue-tab-active {
+  background-color: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.venue-tab-active:hover {
+  color: white;  /* Override hover color when active */
+}
+
+/* ---------- Venue cards ---------- */
+.venue-results {
+  margin-bottom: var(--space-md);
+}
+
+.venue-card {
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-sm);
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  transition: border-color 0.15s ease;
+}
+
+.venue-card:hover {
+  border-color: var(--color-primary);
+}
+
+.venue-name {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+  color: var(--color-text);
+}
+
+.venue-meta {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-xs);
+}
+
+.venue-meta a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.venue-meta a:hover {
+  text-decoration: underline;
+}
+
+.venue-link {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.venue-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .venue-tab {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+}
+/* ---------- Venue loading spinner ---------- */
+.venue-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.venue-spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2.5px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: venue-spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes venue-spin {
+  to { transform: rotate(360deg); }
+}

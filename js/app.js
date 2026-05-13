@@ -14,6 +14,7 @@ import { fetchCommuteEstimate } from './commute.js';
 import { fetchSchoolInfo } from './schools.js';
 import { fetchTaxInfo } from './tax.js';
 import { buildUtilityLinks } from './utilities.js';
+import { getCategoryList, fetchVenues } from './venues.js';
 // ---------- DOM elements ----------
 // We grab references to the elements we'll
 // interact with so we don't repeatedly query.
@@ -94,7 +95,8 @@ async function handleSearch() {
     } catch (utilErr) {
       appendErrorBlock('Utility links unavailable: ' + utilErr.message);
     }
-
+    // Step 6: Render venues section (lazy-load on category click)
+    appendVenuesSection();
   } catch (err) {
     showError(err.message);
   }
@@ -567,6 +569,107 @@ function appendUtilityResults(util) {
     </p>
   `;
   resultsSection.appendChild(block);
+}
+function appendVenuesSection() {
+  const block = document.createElement('section');
+  block.className = 'feature-block';
+
+  const categories = getCategoryList();
+
+  // Build the tab buttons
+  const tabButtons = categories.map((cat, idx) => `
+    <button
+      class="venue-tab ${idx === 0 ? 'venue-tab-active' : ''}"
+      data-category="${cat.key}">
+      ${cat.emoji} ${cat.label}
+    </button>
+  `).join('');
+
+  block.innerHTML = `
+    <h2>Nearby Places</h2>
+    <p class="feature-description">
+      The closest 5 venues in each category. Tap any category to load.
+    </p>
+
+    <div class="venue-tabs">
+      ${tabButtons}
+    </div>
+
+    <div id="venue-results" class="venue-results">
+      <p class="placeholder">Choose a category above to see nearby places.</p>
+    </div>
+
+    <p class="data-source">
+      Data © OpenStreetMap contributors. Coverage varies; results may not include every venue.
+    </p>
+  `;
+  resultsSection.appendChild(block);
+
+  // Wire up tab clicks
+  const tabs = block.querySelectorAll('.venue-tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const categoryKey = tab.dataset.category;
+
+      // Update active state on tabs
+      tabs.forEach(t => t.classList.remove('venue-tab-active'));
+      tab.classList.add('venue-tab-active');
+
+      // Fetch and render this category
+      loadVenuesForCategory(categoryKey);
+    });
+  });
+
+  // Auto-load the first category for instant gratification
+  loadVenuesForCategory(categories[0].key);
+}
+
+
+async function loadVenuesForCategory(categoryKey) {
+  const resultsDiv = document.getElementById('venue-results');
+  if (!resultsDiv) return;
+
+  resultsDiv.innerHTML = `
+    <div class="message message-loading venue-loading">
+      <div class="venue-spinner"></div>
+      <div>Searching nearby venues…</div>
+    </div>
+  `;
+  try {
+    const venues = await fetchVenues(currentLocation, categoryKey);
+    if (venues.length === 0) {
+      resultsDiv.innerHTML = `
+        <p class="placeholder">
+          No venues in this category found nearby. OpenStreetMap coverage varies —
+          some businesses may not yet be in the database.
+        </p>
+      `;
+      return;
+    }
+
+    resultsDiv.innerHTML = venues.map(v => `
+      <div class="venue-card">
+        <div class="venue-name">${escapeHtml(v.name)}</div>
+        <div class="venue-meta">
+          ${v.distanceMiles} mi
+          ${v.address ? ` · ${escapeHtml(v.address)}` : ''}
+          ${v.phone ? ` · <a href="tel:${escapeHtml(v.phone)}">${escapeHtml(v.phone)}</a>` : ''}
+        </div>
+        <a class="venue-link"
+           href="${escapeHtml(v.linkUrl)}"
+           target="_blank"
+           rel="noopener noreferrer">
+          ${escapeHtml(v.linkLabel)}
+        </a>
+      </div>
+    `).join('');
+  } catch (err) {
+    resultsDiv.innerHTML = `
+      <div class="message message-error">
+        Could not load venues: ${escapeHtml(err.message)}
+      </div>
+    `;
+  }
 }
 function escapeHtml(unsafe) {
   if (unsafe == null) return '';
