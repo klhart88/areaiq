@@ -15,6 +15,7 @@ import { fetchSchoolInfo } from './schools.js';
 import { fetchTaxInfo } from './tax.js';
 import { buildUtilityLinks } from './utilities.js';
 import { getCategoryList, fetchVenues } from './venues.js';
+import { fetchDevelopmentTrends } from './development.js';
 // ---------- DOM elements ----------
 // We grab references to the elements we'll
 // interact with so we don't repeatedly query.
@@ -97,6 +98,16 @@ async function handleSearch() {
     }
     // Step 6: Render venues section (lazy-load on category click)
     appendVenuesSection();
+
+    // Step 7: Fetch development trends
+    if (location.countyFips) {
+      try {
+        const development = await fetchDevelopmentTrends(location);
+        appendDevelopmentResults(development);
+      } catch (devErr) {
+        appendErrorBlock('Development trends unavailable: ' + devErr.message);
+      }
+    }
   } catch (err) {
     showError(err.message);
   }
@@ -670,6 +681,77 @@ async function loadVenuesForCategory(categoryKey) {
       </div>
     `;
   }
+}
+function appendDevelopmentResults(dev) {
+  const block = document.createElement('section');
+  block.className = 'feature-block';
+
+  // Build the year-over-year bar chart
+  // Find the max housing units to scale the bars
+  const maxUnits = Math.max(...dev.yearlyData.map(d => d.housingUnits));
+
+  const barRows = dev.yearlyData.map(d => {
+    const widthPercent = (d.housingUnits / maxUnits) * 100;
+    return `
+      <div class="dev-bar-row">
+        <div class="dev-bar-year">${d.year}</div>
+        <div class="dev-bar-track">
+          <div class="dev-bar-fill" style="width: ${widthPercent}%"></div>
+        </div>
+        <div class="dev-bar-value">${formatNumber(d.housingUnits)}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Interpretation styling — different visual treatment per tier
+  const interpretationClass = `dev-interp-${dev.interpretation}`;
+
+  // Change indicator with proper +/- sign
+  const changeSign = dev.totalChange >= 0 ? '+' : '';
+  const changePercentSign = dev.totalChangePercent >= 0 ? '+' : '';
+
+  block.innerHTML = `
+    <h2>Future Development Trends</h2>
+    <p class="feature-description">
+      Housing growth in <strong>${escapeHtml(dev.countyName)} County</strong>
+      over the last ${dev.yearsSpanned} years.
+    </p>
+
+    <div class="dev-summary ${interpretationClass}">
+      <div class="dev-summary-label">${escapeHtml(dev.interpretationLabel)}</div>
+      <div class="dev-summary-stats">
+        <span class="dev-stat-big">${changePercentSign}${dev.totalChangePercent}%</span>
+        <span class="dev-stat-context">
+          ${changeSign}${formatNumber(dev.totalChange)} housing units
+          (${dev.earliest.year}–${dev.latest.year})
+        </span>
+      </div>
+    </div>
+
+    <div class="dev-chart">
+      ${barRows}
+    </div>
+
+    <dl class="result-grid">
+      <dt>Average annual growth</dt>
+      <dd>${changePercentSign}${dev.annualGrowthRate}% per year</dd>
+
+      <dt>Most recent year</dt>
+      <dd>${dev.latest.year} — ${formatNumber(dev.latest.housingUnits)} housing units</dd>
+    </dl>
+
+    <p class="school-disclaimer">
+      Housing unit counts come from Census ACS 5-year estimates, which smooth across
+      a rolling 5-year window. Year-over-year changes reflect actual growth at the
+      county level. Individual neighborhoods within a county may differ significantly
+      from the county-wide trend.
+    </p>
+
+    <p class="data-source">
+      Source: U.S. Census Bureau, American Community Survey 5-Year Estimates (table B25001)
+    </p>
+  `;
+  resultsSection.appendChild(block);
 }
 function escapeHtml(unsafe) {
   if (unsafe == null) return '';
