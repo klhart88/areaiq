@@ -13,6 +13,7 @@ import { renderMap } from './map.js';
 import { fetchCommuteEstimate } from './commute.js';
 import { fetchSchoolInfo } from './schools.js';
 import { fetchTaxInfo } from './tax.js';
+import { buildUtilityLinks } from './utilities.js';
 // ---------- DOM elements ----------
 // We grab references to the elements we'll
 // interact with so we don't repeatedly query.
@@ -84,6 +85,14 @@ async function handleSearch() {
       appendTaxResults(taxInfo);
     } catch (taxErr) {
       appendErrorBlock('Property tax info unavailable: ' + taxErr.message);
+    }
+
+    // Step 5: Build utility resource links
+    try {
+      const utilityLinks = buildUtilityLinks(location);
+      appendUtilityResults(utilityLinks);
+    } catch (utilErr) {
+      appendErrorBlock('Utility links unavailable: ' + utilErr.message);
     }
 
   } catch (err) {
@@ -469,6 +478,95 @@ function appendTaxResults(taxInfo) {
       calculate();
     }
   });
+}
+function appendUtilityResults(util) {
+  const block = document.createElement('section');
+  block.className = 'feature-block';
+
+  // Out-of-state user gets simpler messaging
+  if (!util.inServiceArea) {
+    block.innerHTML = `
+      <h2>Utilities &amp; Services</h2>
+      <p class="placeholder">
+        For utilities outside Indiana, search "${escapeHtml(util.city || 'this area')}
+        utilities and services" online, or check the property's MLS listing for
+        seller-disclosed providers.
+      </p>
+    `;
+    resultsSection.appendChild(block);
+    return;
+  }
+
+  // For Indiana — full utility resource card
+  const cityLabel = util.city ? escapeHtml(util.city) : 'your city';
+
+  block.innerHTML = `
+    <h2>Utilities &amp; Services</h2>
+    <p class="feature-description">
+      Utility providers can vary even within a single neighborhood. The links below
+      take you to authoritative sources for the most current information.
+    </p>
+
+    <div class="utility-group">
+      <h3 class="utility-heading">🌐 Internet</h3>
+      <p class="utility-description">
+        Find broadband providers, speeds, and technologies serving this specific address.
+      </p>
+      <a class="utility-link-button" href="${util.fccBroadbandUrl}" target="_blank" rel="noopener noreferrer">
+        FCC Broadband Map ↗
+      </a>
+    </div>
+
+    <div class="utility-group">
+      <h3 class="utility-heading">⚡ Electric &amp; ⛽ Natural Gas</h3>
+      <p class="utility-description">
+        The Indiana Utility Regulatory Commission (IURC) regulates electric and natural gas
+        utilities and lists service providers by area.
+      </p>
+      <a class="utility-link-button" href="${util.iurcUrl}" target="_blank" rel="noopener noreferrer">
+        IURC Electric Utilities ↗
+      </a>
+      <a class="utility-link-button" href="${util.iurcGasUrl}" target="_blank" rel="noopener noreferrer">
+        IURC Gas Utilities ↗
+      </a>
+    </div>
+
+    <div class="utility-group">
+      <h3 class="utility-heading">💧 Water</h3>
+      <p class="utility-description">
+        The EPA's Safe Drinking Water Information System lists registered public
+        water systems by location.
+      </p>
+      <a class="utility-link-button" href="${util.epaWaterUrl}" target="_blank" rel="noopener noreferrer">
+        EPA SDWIS Search ↗
+      </a>
+    </div>
+
+    <div class="utility-group">
+      <h3 class="utility-heading">🏛️ Sewer, Trash &amp; Recycling</h3>
+      <p class="utility-description">
+        These services are typically provided or contracted by your city. For
+        ${cityLabel}, search local government services for the most current info.
+      </p>
+      <a class="utility-link-button" href="${util.citySearchUrl}" target="_blank" rel="noopener noreferrer">
+        ${cityLabel} water/sewer/trash ↗
+      </a>
+      <a class="utility-link-button" href="${util.cityTrashSearchUrl}" target="_blank" rel="noopener noreferrer">
+        Trash pickup schedule ↗
+      </a>
+    </div>
+
+    <p class="school-disclaimer">
+      Utility providers may differ even between neighboring properties due to annexation history,
+      municipal boundaries, or grandfathered service agreements. Always confirm with seller
+      disclosures and the property's MLS listing before closing.
+    </p>
+
+    <p class="data-source">
+      Sources: FCC National Broadband Map · Indiana Utility Regulatory Commission · EPA SDWIS
+    </p>
+  `;
+  resultsSection.appendChild(block);
 }
 function escapeHtml(unsafe) {
   if (unsafe == null) return '';
