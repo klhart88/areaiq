@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compare Areas — AreaIQ by Hart</title>
+
+  <!-- Mapbox GL JS (loaded from CDN, used for map data) -->
+  <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v3.5.2/mapbox-gl.css">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.5.2/mapbox-gl.js"></script>
+
+  <!-- Turf.js (geographic math library) -->
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7.1.0/turf.min.js"></script>
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1 class="site-title">
+      <span class="brand-highlight">AreaIQ</span>
+      <span class="brand-subtitle">by Hart</span>
+    </h1>
+    <p class="site-tagline">Compare Indiana neighborhoods side-by-side</p>
+    <p class="site-nav">
+      <a href="index.html" class="nav-link">← Back to single-area research</a>
+    </p>
+  </header>
+
+  <main>
+    <section class="search-section">
+      <p class="compare-intro">
+        Enter 2 or 3 Indiana addresses to compare them side-by-side.
+        The comparison view focuses on the most decision-driving stats.
+      </p>
+
+      <div id="compare-inputs">
+        <div class="compare-input-row">
+          <label class="compare-input-label">Area 1</label>
+          <input
+            type="text"
+            id="compare-address-1"
+            class="compare-input"
+            placeholder="100 N Capitol Ave, Indianapolis, IN"
+          >
+        </div>
+
+        <div class="compare-input-row">
+          <label class="compare-input-label">Area 2</label>
+          <input
+            type="text"
+            id="compare-address-2"
+            class="compare-input"
+            placeholder="12 E Main St, Carmel, IN"
+          >
+        </div>
+
+        <div class="compare-input-row" id="compare-row-3" style="display: none;">
+          <label class="compare-input-label">Area 3</label>
+          <input
+            type="text"
+            id="compare-address-3"
+            class="compare-input"
+            placeholder="1 Public Square, Noblesville, IN"
+          >
+          <button type="button" class="compare-remove-button" id="compare-remove-3" aria-label="Remove third area">×</button>
+        </div>
+      </div>
+
+      <button type="button" class="compare-add-button" id="compare-add-button">+ Add a third area</button>
+
+      <button type="button" class="search-button" id="compare-search-button">Compare Areas</button>
+    </section>
+
+    <section id="compare-results-section">
+      <p class="placeholder">Compare 2 or 3 addresses to see results here.</p>
+    </section>
+
+    <section id="compare-share-section" style="display: none;">
+      <p class="compare-share-label">Share this comparison:</p>
+      <div class="compare-share-row">
+        <input type="text" id="compare-share-url" class="compare-share-input" readonly>
+        <button type="button" class="compare-share-button" id="compare-share-button">Copy</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 Kelvin Hart, Fathom Realty · AreaIQ is provided for informational purposes only.</p>
+  </footer>
+
+  <!-- Main script entry point — note: type="module" for ES modules -->
+  <script type="module" src="js/compare.js"></script>
+</body>
+</html>
