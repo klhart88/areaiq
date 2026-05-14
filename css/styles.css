@@ -1044,3 +1044,37 @@ footer {
 .search-secondary-action a:hover {
   text-decoration: underline;
 }
+/* ---------- Compare page polish ---------- */
+
+/* Checkmark on advantage cells */
+.compare-checkmark {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  line-height: 1rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+  background-color: var(--color-primary);
+  border-radius: 50%;
+  margin-right: 0.25rem;
+  vertical-align: middle;
+}
+
+/* More prominent Compare Areas button */
+#compare-search-button {
+  width: 100%;
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 4px rgba(200, 16, 46, 0.15);
+  transition: all 0.15s ease;
+}
+
+#compare-search-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(200, 16, 46, 0.25);
+}

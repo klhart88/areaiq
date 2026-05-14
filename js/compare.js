@@ -232,7 +232,8 @@ function statRow(label, profiles, accessor, formatter, betterDirection) {
     const formatted = v == null ? 'n/a' : (formatter ? formatter(v) : v);
     const isBest = i === bestIndex && bestIndex >= 0;
     const cellClass = isBest ? 'compare-cell compare-cell-best' : 'compare-cell';
-    return `<td class="${cellClass}">${formatted}</td>`;
+    const checkmark = isBest ? '<span class="compare-checkmark" aria-label="Better value">✓</span> ' : '';
+    return `<td class="${cellClass}">${checkmark}${formatted}</td>`;
   }).join('');
 
   return `
@@ -285,7 +286,12 @@ async function copyShareUrl() {
 // ---------- Display helpers ----------
 
 function showLoading(message) {
-  resultsSection.innerHTML = `<div class="message message-loading">${escapeHtml(message)}</div>`;
+  resultsSection.innerHTML = `
+    <div class="message message-loading venue-loading">
+      <div class="venue-spinner"></div>
+      <div>${escapeHtml(message)}</div>
+    </div>
+  `;
   shareSection.style.display = 'none';
 }
 
