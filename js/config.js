@@ -19,18 +19,6 @@ export const CENSUS_API_KEY = 'f0b219afaa069e9f4a46f74010988cc11755d459';
 // Mapbox key (placeholder — we'll add this in a later step)
 export const MAPBOX_KEY = 'pk.eyJ1Ijoia2xoYXJ0ODgiLCJhIjoiY21veW05Mml5MG12cDR1b2c0bGphOXIxbSJ9.RvPvcZUHZ88142do6lEKAQ';
 
-// Google Maps key (placeholder — we'll add this in a later step)
-export const GOOGLE_MAPS_KEY = '';
-
-// EmailJS configuration (placeholder — we'll add this in a later step)
-export const EMAILJS_PUBLIC_KEY = '';
-export const EMAILJS_SERVICE_ID = '';
-export const EMAILJS_TEMPLATE_ID = '';
-
-// Zapier webhook URL for lead capture (placeholder)
-export const ZAPIER_LEAD_WEBHOOK = '';
-
-
 // ---------- Service Area ----------
 // State codes where we offer real estate services.
 // Used to flag in-area leads. Add to this array
@@ -66,3 +54,14 @@ export const CACHE_TTL = {
   venuesOSM: 30 * ONE_DAY,
   permits: 30 * ONE_DAY
 };
+// EmailJS credentials
+// (Public Key is safe to expose due to origin restrictions configured in EmailJS dashboard)
+export const EMAILJS_PUBLIC_KEY = 'jGoc2JKDFReuuJlwN';
+export const EMAILJS_SERVICE_ID = 'service_1qdsjpq';
+export const EMAILJS_TEMPLATE_ID = 'template_3fq6xgm';
+
+// Zapier webhook URL for Airtable lead capture
+export const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/27596963/4y076h6/';
+
+// Where lead notifications should be emailed
+export const LEAD_NOTIFICATION_EMAIL = 'khart@fathomrealty.com';

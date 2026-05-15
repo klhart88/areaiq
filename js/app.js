@@ -16,6 +16,7 @@ import { fetchTaxInfo } from './tax.js';
 import { buildUtilityLinks } from './utilities.js';
 import { getCategoryList, fetchVenues } from './venues.js';
 import { fetchDevelopmentTrends } from './development.js';
+import { appendLeadCaptureForm } from './leadcapture.js';
 // ---------- DOM elements ----------
 // We grab references to the elements we'll
 // interact with so we don't repeatedly query.
@@ -108,6 +109,11 @@ async function handleSearch() {
         appendErrorBlock('Development trends unavailable: ' + devErr.message);
       }
     }
+    // Step 8: Lead capture form (always render)
+    appendLeadCaptureForm(resultsSection, {
+      location: location,
+      sourcePage: 'Main results page'
+    });
   } catch (err) {
     showError(err.message);
   }

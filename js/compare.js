@@ -15,6 +15,7 @@ import { fetchDemographics } from './demographics.js';
 import { fetchSchoolInfo } from './schools.js';
 import { fetchTaxInfo } from './tax.js';
 import { fetchDevelopmentTrends } from './development.js';
+import { appendLeadCaptureForm } from './leadcapture.js';
 
 
 // DOM references
@@ -203,6 +204,16 @@ function renderComparison(profiles) {
 
   // Show the share section now that we have valid results
   shareSection.style.display = 'block';
+
+  // Append lead capture form after comparison renders
+  appendLeadCaptureForm(resultsSection, {
+    areas: profiles.map(p => ({
+      city: p.location.city,
+      state: p.location.state
+    })),
+    location: profiles[0].location,  // Use first area for "in service area" check
+    sourcePage: 'Comparison page'
+  });
 }
 
 
