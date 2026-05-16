@@ -1,154 +1,254 @@
 // ============================================
 // AreaIQ by Hart — Lead Capture module
 //
-// Handles the lead capture form on both the main
-// results page and the comparison page.
+// Handles two distinct lead capture flows:
 //
-// On submission, two parallel actions fire:
-// 1. EmailJS sends a notification email to you
-// 2. Zapier webhook writes the lead to Airtable
+// 1. "Email me my results" — captures contact and
+//    sends the user a polished HTML email with
+//    their research data. Notifies you (the agent)
+//    that a lead saved research.
 //
-// Both must succeed for a "fully successful" lead.
-// If just one fails, we still consider it captured
-// (your CRM has it OR your email has it) and show
-// success to the user.
+// 2. "Ask Kelvin a question" — captures contact +
+//    a specific question. Sends you a notification
+//    with the question. Sends them a brief confirmation.
+//
+// Both flows write to Airtable via Zapier with a
+// "Request Type" field distinguishing the two.
 // ============================================
 
 import {
   EMAILJS_PUBLIC_KEY,
   EMAILJS_SERVICE_ID,
   EMAILJS_TEMPLATE_ID,
+  EMAILJS_RESULTS_TEMPLATE_ID,
   ZAPIER_WEBHOOK_URL,
   LEAD_NOTIFICATION_EMAIL
 } from './config.js';
 
+import {
+  buildSingleAreaResearchHtml,
+  buildComparisonResearchHtml
+} from './research-summary.js';
+
 
 // Initialize EmailJS once when this module loads
-// (emailjs is a global from the CDN script tag)
 if (typeof emailjs !== 'undefined') {
   emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 }
 
 
-// Public function: build the lead capture form and
-// inject it into a given container element.
-// Context is { location, sourcePage } describing
-// what the user was researching.
+// ============================================
+// Public function — entry point
+// ============================================
+
+// Build and inject the two-CTA lead capture section.
+// Context describes what the user was researching.
+// Shape: { location, demographics, schoolInfo, taxInfo,
+//          devTrends, sourcePage, profiles? }
+//   - For single-page: provide individual data objects
+//   - For comparison: provide profiles array
 export function appendLeadCaptureForm(container, context) {
   const block = document.createElement('section');
   block.className = 'feature-block lead-capture-block';
 
-  // Tailor messaging based on whether they're in the service area
   const inIndiana = context.location?.state === 'IN';
-  const cityName = context.location?.city || 'the area you researched';
+  const cityName = context.location?.city || 'this area';
 
-  const headline = inIndiana
-    ? `Want updates about ${escapeHtml(cityName)}?`
-    : 'Save your research';
-
-  const subline = inIndiana
-    ? `I'm Kelvin Hart, a Fathom Realty agent based in Indiana. I can save this research and send you new listings, market updates, or answer specific questions about ${escapeHtml(cityName)}.`
-    : `Save this research and I'll send it to you. If you're considering moving to Indiana, I can also send you updates about the areas you're considering.`;
+  const sublineEmail = `Get a polished copy of your research delivered to your inbox.`;
+  const sublineAsk = inIndiana
+    ? `I'm Kelvin Hart, a Fathom Realty agent in Indiana. Have a specific question about ${escapeHtml(cityName)}? I'll respond personally.`
+    : `Have a specific question about your research? Send it directly to me.`;
 
   block.innerHTML = `
-    <h2>${headline}</h2>
-    <p class="feature-description">${subline}</p>
+    <h2>Save or share your research</h2>
 
-    <form class="lead-form" id="lead-capture-form" novalidate>
+    <div class="lead-cta-grid">
+      <div class="lead-cta-card">
+        <div class="lead-cta-icon">📨</div>
+        <h3 class="lead-cta-title">Email me these results</h3>
+        <p class="lead-cta-description">${sublineEmail}</p>
+        <button type="button" class="lead-cta-button" data-flow="results">
+          Send me my research →
+        </button>
+      </div>
+
+      <div class="lead-cta-card">
+        <div class="lead-cta-icon">💬</div>
+        <h3 class="lead-cta-title">Ask Kelvin a question</h3>
+        <p class="lead-cta-description">${sublineAsk}</p>
+        <button type="button" class="lead-cta-button lead-cta-button-secondary" data-flow="question">
+          Ask a question →
+        </button>
+      </div>
+    </div>
+
+    <div id="lead-form-container"></div>
+  `;
+
+  container.appendChild(block);
+
+  // Wire up the CTA buttons
+  const ctaButtons = block.querySelectorAll('.lead-cta-button');
+  ctaButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const flow = button.dataset.flow;
+      showForm(flow, context);
+    });
+  });
+}
+
+
+// ============================================
+// Form rendering
+// ============================================
+
+function showForm(flow, context) {
+  const formContainer = document.getElementById('lead-form-container');
+
+  if (flow === 'results') {
+    formContainer.innerHTML = renderResultsForm(context);
+  } else if (flow === 'question') {
+    formContainer.innerHTML = renderQuestionForm(context);
+  }
+
+  // Scroll the form into view for better UX
+  formContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  // Wire up the form's submit handler
+  const form = formContainer.querySelector('.lead-form');
+  if (form) {
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      handleLeadSubmit(form, flow, context);
+    });
+  }
+
+  // Wire up the cancel button
+  const cancelButton = formContainer.querySelector('.lead-cancel-button');
+  if (cancelButton) {
+    cancelButton.addEventListener('click', () => {
+      formContainer.innerHTML = '';
+    });
+  }
+
+  // Focus the email field
+  const emailInput = formContainer.querySelector('#lead-email');
+  if (emailInput) emailInput.focus();
+}
+
+
+function renderResultsForm(context) {
+  return `
+    <form class="lead-form" novalidate>
+      <h3 class="lead-form-heading">Where should I send your research?</h3>
+
       <div class="lead-field">
         <label for="lead-email" class="lead-label">Email <span class="lead-required">*</span></label>
-        <input
-          type="email"
-          id="lead-email"
-          class="lead-input"
-          placeholder="you@example.com"
-          required
-          autocomplete="email">
+        <input type="email" id="lead-email" class="lead-input" placeholder="you@example.com" required autocomplete="email">
       </div>
 
       <div class="lead-field-row">
         <div class="lead-field">
           <label for="lead-name" class="lead-label">Name <span class="lead-optional">(optional)</span></label>
-          <input
-            type="text"
-            id="lead-name"
-            class="lead-input"
-            placeholder="Your name"
-            autocomplete="name">
+          <input type="text" id="lead-name" class="lead-input" placeholder="Your name" autocomplete="name">
         </div>
-
         <div class="lead-field">
           <label for="lead-phone" class="lead-label">Phone <span class="lead-optional">(optional)</span></label>
-          <input
-            type="tel"
-            id="lead-phone"
-            class="lead-input"
-            placeholder="(317) 555-0123"
-            autocomplete="tel">
+          <input type="tel" id="lead-phone" class="lead-input" placeholder="(317) 555-0123" autocomplete="tel">
+        </div>
+      </div>
+
+      <div class="lead-button-row">
+        <button type="submit" class="lead-submit-button">Send my research</button>
+        <button type="button" class="lead-cancel-button">Cancel</button>
+      </div>
+
+      <p class="lead-privacy-note">
+        Your info is used only to send your research and follow up if you want. Never shared or sold.
+      </p>
+
+      <div id="lead-result"></div>
+    </form>
+  `;
+}
+
+
+function renderQuestionForm(context) {
+  return `
+    <form class="lead-form" novalidate>
+      <h3 class="lead-form-heading">Ask your question</h3>
+
+      <div class="lead-field">
+        <label for="lead-email" class="lead-label">Email <span class="lead-required">*</span></label>
+        <input type="email" id="lead-email" class="lead-input" placeholder="you@example.com" required autocomplete="email">
+      </div>
+
+      <div class="lead-field-row">
+        <div class="lead-field">
+          <label for="lead-name" class="lead-label">Name <span class="lead-optional">(optional)</span></label>
+          <input type="text" id="lead-name" class="lead-input" placeholder="Your name" autocomplete="name">
+        </div>
+        <div class="lead-field">
+          <label for="lead-phone" class="lead-label">Phone <span class="lead-optional">(optional)</span></label>
+          <input type="tel" id="lead-phone" class="lead-input" placeholder="(317) 555-0123" autocomplete="tel">
         </div>
       </div>
 
       <div class="lead-field">
-        <label for="lead-notes" class="lead-label">Anything specific you'd like to know? <span class="lead-optional">(optional)</span></label>
-        <textarea
-          id="lead-notes"
-          class="lead-input lead-textarea"
-          placeholder="e.g., 'Looking for 3BR homes under $400k' or 'Tell me about school ratings'"
-          rows="3"></textarea>
+        <label for="lead-notes" class="lead-label">Your question <span class="lead-required">*</span></label>
+        <textarea id="lead-notes" class="lead-input lead-textarea" placeholder="e.g., 'What's the typical commute time to downtown?' or 'Are these homes typically 3BR or 4BR?'" rows="4" required></textarea>
       </div>
 
-      <button type="submit" class="lead-submit-button">Send my request</button>
+      <div class="lead-button-row">
+        <button type="submit" class="lead-submit-button">Send your question</button>
+        <button type="button" class="lead-cancel-button">Cancel</button>
+      </div>
 
       <p class="lead-privacy-note">
-        Your information is used only to follow up about your research.
-        I'll never share or sell your contact info.
+        I'll respond personally within 24 hours, usually much sooner.
       </p>
+
+      <div id="lead-result"></div>
     </form>
-
-    <div id="lead-result"></div>
   `;
-
-  container.appendChild(block);
-
-  // Wire up form submission
-  const form = block.querySelector('#lead-capture-form');
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    handleLeadSubmit(form, context);
-  });
 }
 
 
-// ---------- Form submission ----------
+// ============================================
+// Form submission
+// ============================================
 
-async function handleLeadSubmit(form, context) {
+async function handleLeadSubmit(form, flow, context) {
   const emailInput = form.querySelector('#lead-email');
   const nameInput = form.querySelector('#lead-name');
   const phoneInput = form.querySelector('#lead-phone');
-  const notesInput = form.querySelector('#lead-notes');
+  const notesInput = form.querySelector('#lead-notes');  // only exists on question form
   const submitButton = form.querySelector('.lead-submit-button');
-  const resultDiv = document.getElementById('lead-result');
+  const resultDiv = form.querySelector('#lead-result');
 
   const email = emailInput.value.trim();
   const name = nameInput.value.trim();
   const phone = phoneInput.value.trim();
-  const notes = notesInput.value.trim();
+  const notes = notesInput ? notesInput.value.trim() : '';
 
-  // Basic email validation
+  // Validation
   if (!email || !isValidEmail(email)) {
     showLeadError(resultDiv, 'Please enter a valid email address.');
     emailInput.focus();
     return;
   }
 
+  if (flow === 'question' && !notes) {
+    showLeadError(resultDiv, 'Please enter your question before submitting.');
+    notesInput.focus();
+    return;
+  }
+
   // Disable form during submission
   submitButton.disabled = true;
-  submitButton.innerHTML = `
-    <span class="lead-spinner"></span>
-    <span>Sending...</span>
-  `;
+  submitButton.innerHTML = `<span class="lead-spinner"></span><span>Sending...</span>`;
 
-  // Build the lead data payload
+  // Build the lead data (used for notification email + Airtable)
   const leadData = {
     lead_email: email,
     lead_name: name || '(not provided)',
@@ -156,55 +256,96 @@ async function handleLeadSubmit(form, context) {
     lead_notes: notes || '(no notes)',
     searched_area: buildSearchedAreaSummary(context),
     source_page: context.sourcePage,
+    request_type: flow === 'results' ? 'Send results' : 'Ask question',
     in_service_area: context.location?.state === 'IN' ? 'Yes' : 'No',
     capture_time: new Date().toLocaleString('en-US', { timeZone: 'America/Indiana/Indianapolis' }),
     to_email: LEAD_NOTIFICATION_EMAIL
   };
 
-  // Fire both submissions in parallel
-  const [emailResult, zapierResult] = await Promise.allSettled([
-    sendViaEmailJS(leadData),
-    sendViaZapier(leadData, context)
-  ]);
+  // Always send notification to agent (existing template)
+  const promises = [sendNotificationEmail(leadData)];
 
-  // Determine success/failure
-  const emailOk = emailResult.status === 'fulfilled';
-  const zapierOk = zapierResult.status === 'fulfilled';
+  // If flow is "results", also send the results email to the user
+  if (flow === 'results') {
+    promises.push(sendResultsEmail(leadData, context));
+  }
 
-  if (emailOk || zapierOk) {
-    // At least one succeeded — show success
-    showLeadSuccess(form, resultDiv, email, context);
+  // Send to Zapier (writes to Airtable)
+  promises.push(sendToZapier(leadData, context));
 
-    // Log partial failures to console for debugging
-    if (!emailOk) console.warn('EmailJS submission failed:', emailResult.reason);
-    if (!zapierOk) console.warn('Zapier submission failed:', zapierResult.reason);
+  const results = await Promise.allSettled(promises);
+
+  // Check results — succeed if any submission worked
+  const anySucceeded = results.some(r => r.status === 'fulfilled');
+
+  if (anySucceeded) {
+    showLeadSuccess(form, resultDiv, email, flow, context);
+
+    // Log any failures for debugging
+    results.forEach((r, i) => {
+      if (r.status === 'rejected') {
+        const labels = ['notification email', 'results email', 'CRM/Airtable'];
+        console.warn(`${labels[i] || 'submission'} failed:`, r.reason);
+      }
+    });
   } else {
-    // Both failed — show error and re-enable the form
-    showLeadError(resultDiv, 'Sorry, something went wrong sending your request. Please try again or email Kelvin directly.');
+    showLeadError(resultDiv, 'Sorry, something went wrong. Please try again or email Kelvin directly at ' + LEAD_NOTIFICATION_EMAIL + '.');
     submitButton.disabled = false;
-    submitButton.textContent = 'Send my request';
+    submitButton.textContent = flow === 'results' ? 'Send my research' : 'Send your question';
   }
 }
 
 
-// ---------- EmailJS submission ----------
+// ============================================
+// Send the agent notification email
+// ============================================
 
-async function sendViaEmailJS(leadData) {
+async function sendNotificationEmail(leadData) {
   if (typeof emailjs === 'undefined') {
     throw new Error('EmailJS SDK not loaded');
   }
-
   return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, leadData);
 }
 
 
-// ---------- Zapier webhook submission ----------
+// ============================================
+// Send the user's research email (HTML)
+// ============================================
 
-async function sendViaZapier(leadData, context) {
-  // Build the payload Zapier will receive
-  // Using URLSearchParams (form-encoded) instead of JSON because
-  // Zapier webhooks don't send CORS preflight headers, so JSON POST
-  // gets blocked. Form-encoded POSTs bypass CORS preflight entirely.
+async function sendResultsEmail(leadData, context) {
+  if (typeof emailjs === 'undefined') {
+    throw new Error('EmailJS SDK not loaded');
+  }
+
+  // Build the research HTML content
+  let researchHtml;
+  if (context.profiles && context.profiles.length > 1) {
+    researchHtml = buildComparisonResearchHtml(context.profiles);
+  } else {
+    researchHtml = buildSingleAreaResearchHtml(context);
+  }
+
+  // Build the CTA URL — deep link back to AreaIQ
+  const ctaUrl = buildCtaUrl(context);
+
+  // Pass to the EmailJS results template
+  const params = {
+    lead_email: leadData.lead_email,
+    lead_name: leadData.lead_name === '(not provided)' ? 'there' : leadData.lead_name,
+    searched_area: leadData.searched_area,
+    research_html: researchHtml,
+    cta_url: ctaUrl
+  };
+
+  return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_RESULTS_TEMPLATE_ID, params);
+}
+
+
+// ============================================
+// Send to Zapier (Airtable CRM)
+// ============================================
+
+async function sendToZapier(leadData, context) {
   const payload = new URLSearchParams({
     email: leadData.lead_email,
     name: leadData.lead_name === '(not provided)' ? '' : leadData.lead_name,
@@ -212,6 +353,7 @@ async function sendViaZapier(leadData, context) {
     notes: leadData.lead_notes === '(no notes)' ? '' : leadData.lead_notes,
     searched_address: leadData.searched_area,
     source_page: context.sourcePage,
+    request_type: leadData.request_type,
     in_indiana: context.location?.state === 'IN' ? 'true' : 'false',
     captured_at: new Date().toISOString()
   });
@@ -219,31 +361,28 @@ async function sendViaZapier(leadData, context) {
   const response = await fetch(ZAPIER_WEBHOOK_URL, {
     method: 'POST',
     body: payload
-    // Note: we deliberately omit Content-Type header here.
-    // URLSearchParams sets it to 'application/x-www-form-urlencoded'
-    // automatically, which is a "simple request" type that doesn't
-    // trigger CORS preflight.
   });
 
   if (!response.ok) {
     throw new Error(`Zapier returned ${response.status}`);
   }
-
   return response.json();
 }
 
 
-// ---------- Success and error display ----------
+// ============================================
+// Success/error display
+// ============================================
 
-function showLeadSuccess(form, resultDiv, email, context) {
-  // Hide the form
+function showLeadSuccess(form, resultDiv, email, flow, context) {
   form.style.display = 'none';
 
-  // Build success message
-  const inIndiana = context.location?.state === 'IN';
-  const successMsg = inIndiana
-    ? `Got it! I'll be in touch soon at <strong>${escapeHtml(email)}</strong> with information about the area you researched. In the meantime, feel free to keep exploring AreaIQ.`
-    : `Got it! I'll be in touch soon at <strong>${escapeHtml(email)}</strong>. If you're considering Indiana, I'd love to help you research areas further.`;
+  let successMsg;
+  if (flow === 'results') {
+    successMsg = `Your research is on the way to <strong>${escapeHtml(email)}</strong>. Check your inbox in the next few minutes (and your spam folder if it doesn't arrive). Feel free to keep exploring or compare other areas.`;
+  } else {
+    successMsg = `Got it! Your question is on its way to me. I'll respond to <strong>${escapeHtml(email)}</strong> personally within 24 hours, usually much sooner.`;
+  }
 
   resultDiv.innerHTML = `
     <div class="lead-success">
@@ -253,37 +392,47 @@ function showLeadSuccess(form, resultDiv, email, context) {
   `;
 }
 
-
 function showLeadError(resultDiv, message) {
-  resultDiv.innerHTML = `
-    <div class="message message-error">${escapeHtml(message)}</div>
-  `;
+  resultDiv.innerHTML = `<div class="message message-error">${escapeHtml(message)}</div>`;
 }
 
 
-// ---------- Helpers ----------
+// ============================================
+// Helpers
+// ============================================
 
 function buildSearchedAreaSummary(context) {
-  if (context.areas && context.areas.length > 1) {
-    // Comparison page — multiple areas
-    return context.areas
-      .map(a => `${a.city || 'unknown'}, ${a.state || ''}`.trim())
+  if (context.profiles && context.profiles.length > 1) {
+    return context.profiles
+      .map(p => `${p.location.city || 'unknown'}, ${p.location.state || ''}`.trim())
       .join(' vs. ');
   }
-
-  // Main page — single area
   const loc = context.location;
   if (!loc) return 'Unknown';
   return `${loc.address || ''}`.replace(/, United States$/, '');
 }
 
+function buildCtaUrl(context) {
+  const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/');
 
-function isValidEmail(email) {
-  // Simple email regex — good enough for client-side validation
-  // (real validation happens when the email actually delivers)
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (context.profiles && context.profiles.length > 1) {
+    // Comparison — link back to compare.html with all addresses
+    const params = new URLSearchParams();
+    context.profiles.forEach((p, i) => {
+      const key = ['a', 'b', 'c'][i];
+      if (key) params.set(key, p.location.address.replace(/, United States$/, ''));
+    });
+    return `${baseUrl}compare.html?${params.toString()}`;
+  }
+
+  // Single area — link back to index.html with the address pre-filled via query param
+  // (we'd need to add this functionality to app.js separately; for now just link to home)
+  return `${baseUrl}index.html`;
 }
 
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
 function escapeHtml(unsafe) {
   if (unsafe == null) return '';

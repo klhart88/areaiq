@@ -207,10 +207,7 @@ function renderComparison(profiles) {
 
   // Append lead capture form after comparison renders
   appendLeadCaptureForm(resultsSection, {
-    areas: profiles.map(p => ({
-      city: p.location.city,
-      state: p.location.state
-    })),
+    profiles: profiles,
     location: profiles[0].location,  // Use first area for "in service area" check
     sourcePage: 'Comparison page'
   });

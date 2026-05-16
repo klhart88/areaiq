@@ -61,8 +61,15 @@ async function handleSearch() {
     currentLocation = location;
     showLocationResults(location);
 
-    // Step 2: Fetch demographics (and remember for tax estimate)
+    // Variables we'll populate as data fetches complete
+    // (declared here so they're available for the lead capture form)
     let demographics = null;
+    let schoolInfo = null;
+    let taxInfo = null;
+    let devTrends = null;
+
+    // Step 2: Fetch demographics (and remember for tax estimate)
+    
     if (location.censusTract) {
       try {
         demographics = await fetchDemographics(location);
@@ -76,7 +83,7 @@ async function handleSearch() {
 
     // Step 3: Fetch school district info
     try {
-      const schoolInfo = await fetchSchoolInfo(location);
+      schoolInfo = await fetchSchoolInfo(location);
       appendSchoolResults(schoolInfo);
     } catch (schoolErr) {
       appendErrorBlock('School information unavailable: ' + schoolErr.message);
@@ -84,7 +91,7 @@ async function handleSearch() {
 
     // Step 4: Fetch property tax info
     try {
-      const taxInfo = await fetchTaxInfo(location, demographics);
+      taxInfo = await fetchTaxInfo(location, demographics);
       appendTaxResults(taxInfo);
     } catch (taxErr) {
       appendErrorBlock('Property tax info unavailable: ' + taxErr.message);
@@ -103,7 +110,7 @@ async function handleSearch() {
     // Step 7: Fetch development trends
     if (location.countyFips) {
       try {
-        const development = await fetchDevelopmentTrends(location);
+        devTrends = await fetchDevelopmentTrends(location);
         appendDevelopmentResults(development);
       } catch (devErr) {
         appendErrorBlock('Development trends unavailable: ' + devErr.message);
@@ -112,6 +119,10 @@ async function handleSearch() {
     // Step 8: Lead capture form (always render)
     appendLeadCaptureForm(resultsSection, {
       location: location,
+      demographics: demographics,
+      schoolInfo: schoolInfo,
+      taxInfo: taxInfo,
+      devTrends: devTrends,
       sourcePage: 'Main results page'
     });
   } catch (err) {

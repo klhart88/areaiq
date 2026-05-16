@@ -976,51 +976,57 @@ footer {
   }
 }
 
-/* ---------- Compare share section ---------- */
+/* ---------- Comparison: Quieter share section ---------- */
+
 #compare-share-section {
   margin-top: var(--space-md);
+  margin-bottom: var(--space-md);
   padding: var(--space-md);
-  background-color: var(--color-bg);
+  background-color: transparent;
+  border: 1px dashed var(--color-border);
   border-radius: var(--radius);
-  border: 1px solid var(--color-border);
 }
 
-.compare-share-label {
+#compare-share-section h2,
+#compare-share-section .share-heading {
+  font-size: 0.9375rem;
   font-weight: 600;
-  margin-bottom: var(--space-sm);
-  color: var(--color-text);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-sm) 0;
 }
 
-.compare-share-row {
+#compare-share-section .share-row {
   display: flex;
   gap: var(--space-sm);
+  align-items: center;
 }
 
-.compare-share-input {
+#compare-share-input {
   flex: 1;
   padding: var(--space-sm);
   font-size: 0.875rem;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  font-family: monospace;
-  background-color: var(--color-card);
+  font-family: inherit;
 }
 
-.compare-share-button {
+#compare-share-button {
   padding: var(--space-sm) var(--space-md);
   font-size: 0.875rem;
   font-weight: 600;
-  color: white;
-  background-color: var(--color-primary);
-  border: none;
+  color: var(--color-primary);
+  background-color: transparent;
+  border: 1px solid var(--color-primary);
   border-radius: var(--radius);
   cursor: pointer;
-  transition: background-color 0.15s ease;
-  white-space: nowrap;
+  transition: all 0.15s ease;
 }
 
-.compare-share-button:hover {
-  background-color: var(--color-primary-light);
+#compare-share-button:hover {
+  background-color: var(--color-primary);
+  color: white;
 }
 
 @media (max-width: 480px) {
@@ -1241,5 +1247,149 @@ footer {
   }
   .lead-field-row .lead-field {
     margin-bottom: var(--space-md);
+  }
+}
+/* ---------- Lead Capture: Two-CTA UI ---------- */
+
+/* Override the existing lead-capture-block heading sizing for the new layout */
+.lead-capture-block h2 {
+  font-size: 1.375rem;
+  text-align: center;
+  margin-bottom: var(--space-md);
+}
+
+/* CTA grid — two cards side-by-side on desktop */
+.lead-cta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.lead-cta-card {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-lg);
+  text-align: center;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.lead-cta-card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(200, 16, 46, 0.1);
+}
+
+.lead-cta-icon {
+  font-size: 2rem;
+  line-height: 1;
+  margin-bottom: var(--space-xs);
+}
+
+.lead-cta-title {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.lead-cta-description {
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-sm) 0;
+  line-height: 1.5;
+  flex-grow: 1;
+}
+
+.lead-cta-button {
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: white;
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  width: 100%;
+}
+
+.lead-cta-button:hover {
+  background-color: var(--color-primary-light);
+}
+
+.lead-cta-button-secondary {
+  background-color: var(--color-card);
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+}
+
+.lead-cta-button-secondary:hover {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+/* On mobile, stack the cards vertically */
+@media (max-width: 600px) {
+  .lead-cta-grid {
+    grid-template-columns: 1fr;
+  }
+  .lead-cta-card {
+    padding: var(--space-md);
+  }
+}
+
+/* ---------- Lead Capture: Forms ---------- */
+
+.lead-form-heading {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.lead-button-row {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+  align-items: center;
+}
+
+.lead-cancel-button {
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lead-cancel-button:hover {
+  border-color: var(--color-text-muted);
+  color: var(--color-text);
+}
+
+.lead-submit-button {
+  flex: 1;
+}
+
+@media (max-width: 480px) {
+  .lead-button-row {
+    flex-direction: column-reverse;
+  }
+  .lead-submit-button,
+  .lead-cancel-button {
+    width: 100%;
   }
 }

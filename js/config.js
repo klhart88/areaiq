@@ -59,6 +59,7 @@ export const CACHE_TTL = {
 export const EMAILJS_PUBLIC_KEY = 'jGoc2JKDFReuuJlwN';
 export const EMAILJS_SERVICE_ID = 'service_1qdsjpq';
 export const EMAILJS_TEMPLATE_ID = 'template_3fq6xgm';
+export const EMAILJS_RESULTS_TEMPLATE_ID = 'template_ygnh03j';
 
 // Zapier webhook URL for Airtable lead capture
 export const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/27596963/4y076h6/';
