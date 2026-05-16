@@ -1403,3 +1403,25 @@ footer {
 .placeholder {
   font-size: 1rem;
 }
+/* ---------- Header brand row with logo ---------- */
+
+.header-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.brand-logo {
+  height: 2.43rem;
+  width: auto;
+  flex-shrink: 0;
+}
+
+/* On mobile, stack the logo above the title and shrink it further */
+@media (max-width: 480px) {
+  .brand-logo {
+    height: 1.7rem;
+  }
+}
