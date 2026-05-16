@@ -4,61 +4,145 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AreaIQ by Hart — Indiana Neighborhood Research</title>
+  <meta name="description" content="Research Indiana neighborhoods before you buy. Demographics, schools, taxes, commute, and more — all in one place. Free tool by Kelvin Hart, Fathom Realty.">
 
   <!-- Mapbox GL JS (loaded from CDN) -->
   <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v3.5.2/mapbox-gl.css">
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.5.2/mapbox-gl.js"></script>
 
   <!-- Turf.js (geographic math library) -->
-<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7.1.0/turf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7.1.0/turf.min.js"></script>
 
-    <!-- EmailJS (for lead capture notifications) -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4.4.1/dist/email.min.js"></script>
+  <!-- EmailJS (for lead capture notifications) -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4.4.1/dist/email.min.js"></script>
 
-<link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
+<body>
 
-  <header>
-  <div class="header-brand-row">
-    <img class="brand-logo" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqTovmMq5F8JFnV-Ky78ffDXDKY0mahDaY3_ABEEF0cf2PSCjbD2UrnuY&s" alt="Fathom Realty">
-    <h1>AreaIQ <span class="brand-by">by Hart</span></h1>
+<!-- ══════════════════════════════════════════
+     HEADER — brand bar with contact info
+     ══════════════════════════════════════════ -->
+<header>
+  <div class="header-inner">
+    <div class="header-brand-row">
+      <img
+        class="brand-logo"
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqTovmMq5F8JFnV-Ky78ffDXDKY0mahDaY3_ABEEF0cf2PSCjbD2UrnuY&s"
+        alt="Fathom Realty"
+      >
+      <div class="header-title-group">
+        <h1>AreaIQ <span class="brand-by">by Hart</span></h1>
+        <p class="header-tagline">Indiana neighborhood research</p>
+      </div>
+    </div>
+    <div class="header-contact">
+      <a href="tel:3178338419" class="header-phone">(317) 833-8419</a>
+    </div>
   </div>
-  <p class="tagline">Research Indiana neighborhoods before you buy</p>
 </header>
 
-  <main>
+<!-- ══════════════════════════════════════════
+     HERO — headline, search bar, how-it-works
+     Full-width section with branded background.
+     ══════════════════════════════════════════ -->
+<div class="hero-wrapper">
+  <div class="hero-inner">
+
+    <div class="hero-content">
+      <h2 class="hero-headline">Know the neighborhood <em>before you buy.</em></h2>
+      <p class="hero-subtext">
+        Enter any Indiana address for a free snapshot of demographics, schools,
+        property taxes, commute times, nearby places, and development trends —
+        all in one place.
+      </p>
+    </div>
+
     <section id="search-section">
       <label for="address-input">Enter an address to research:</label>
-      <input
-        type="text"
-        id="address-input"
-        placeholder="123 Main St, Noblesville, IN 46060"
-        autocomplete="off"
-      >
-      <button id="search-button" type="button">Search</button>
+      <div class="search-input-row">
+        <input
+          type="text"
+          id="address-input"
+          placeholder="123 Main St, Noblesville, IN 46060"
+          autocomplete="off"
+        >
+        <button id="search-button" type="button">Search →</button>
+      </div>
       <p class="search-secondary-action">
-        Researching multiple areas? <a href="compare.html">Compare neighborhoods side-by-side →</a>
+        Researching multiple areas?
+        <a href="compare.html">Compare neighborhoods side-by-side →</a>
       </p>
     </section>
 
-    <section id="results-section">
-  <p class="results-intro">
-    AreaIQ is a free Indiana neighborhood research tool that pulls together public data like demographics, schools, taxes, commute estimates, nearby places, and development trends in one place.
-  </p>
+    <div class="how-it-works">
+      <div class="hiw-step">
+        <div class="hiw-num">1</div>
+        <p class="hiw-text">Enter any Indiana address</p>
+      </div>
+      <div class="hiw-step">
+        <div class="hiw-num">2</div>
+        <p class="hiw-text">Review your neighborhood snapshot</p>
+      </div>
+      <div class="hiw-step">
+        <div class="hiw-num">3</div>
+        <p class="hiw-text">Connect with Kelvin to tour or make an offer</p>
+      </div>
+    </div>
 
-  <p class="placeholder">
-    <strong>Results will appear here once you search.</strong>
-  </p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MAIN — results render here after search
+     ══════════════════════════════════════════ -->
+<main>
+  <section id="results-section">
+    <p class="results-intro">
+      AreaIQ is a free Indiana neighborhood research tool that pulls together
+      public data like demographics, schools, taxes, commute estimates, nearby
+      places, and development trends in one place.
+    </p>
+    <p class="placeholder">
+      <strong>Results will appear here once you search.</strong>
+    </p>
+  </section>
+</main>
+
+<!-- ══════════════════════════════════════════
+     AGENT BIO — always visible below results
+     Add assets/kelvin-hart.jpg to your repo
+     (copy from next-level-living-space/assets)
+     ══════════════════════════════════════════ -->
+<section class="agent-bio-section">
+  <div class="agent-bio-inner">
+    <img
+      class="agent-photo"
+      src="./assets/kelvin-hart.jpg"
+      alt="Kelvin Hart, Realtor"
+      onerror="this.style.display='none'"
+    >
+    <div class="agent-bio-text">
+      <p class="agent-ready">Ready to take the next step?</p>
+      <p class="agent-description">
+        I'm Kelvin Hart with Fathom Realty — Noblesville, IN. With 9 years of
+        Indiana real estate expertise, I specialize in first-time buyers, repeat
+        homebuyers, investors, and new construction. Let me put those skills to
+        work for you.
+      </p>
+      <a href="tel:3178338419" class="agent-cta-button">Call (317) 833-8419</a>
+    </div>
+  </div>
 </section>
-  </main>
 
-  <footer>
-    <p>Created by Kelvin Hart, Fathom Realty (Noblesville, IN)</p>
-  </footer>
+<footer>
+  <p>Created by Kelvin Hart, Fathom Realty (Noblesville, IN)</p>
+</footer>
+
 <script type="module" src="js/app.js"></script>
+
 <!-- Jotform AI chatbot -->
-<script
-  src='https://cdn.jotfor.ms/agent/embedjs/019e2e8c79697ca3b41f2044a2552a57fd9d/embed.js'>
-</script>
+<script src="https://cdn.jotfor.ms/agent/embedjs/019e2e8c79697ca3b41f2044a2552a57fd9d/embed.js"></script>
+
 </body>
 </html>
