@@ -1719,16 +1719,15 @@ main > section:first-of-type,
 
    YOUR HTML should look something like:
    <section class="hero">
-     <div class="hero-inner">           ← add this wrapper if not present
-       <div class="hero-content">       ← left column (heading + desc)
-         <h1>…</h1>
-         <p>…</p>
-       </div>
-       <div class="hero-search">        ← right column (search form)
-         …search form…
-       </div>
-     </div>
-   </section>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <!-- your h1 and p text here -->
+    </div>
+    <div class="hero-search">
+      <!-- your address input + Search button here -->
+    </div>
+  </div>
+</section>
 
    If your structure differs, adapt the selector names below.
    ---------------------------------------------------------------- */
