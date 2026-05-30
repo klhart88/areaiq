@@ -1,0 +1,12 @@
+{
+  "state": "IN",
+  "stateName": "Indiana",
+  "effectiveRate": 0.0084,
+  "effectiveRatePercent": "0.84%",
+  "rateSource": "Tax Foundation, 2024 average effective property tax rate",
+  "rateAsOf": "2024",
+  "billingSchedule": "semi-annual",
+  "billingDescription": "Indiana counties bill property taxes semi-annually, due in early May and early November.",
+  "homesteadDeduction": "Indiana offers a Homestead Standard Deduction (up to $48,000 or 60% of assessed value, whichever is less) plus a Supplemental Homestead Deduction. Real tax bills for primary residences are typically lower than these estimates.",
+  "verificationSource": "Verify exact taxes with your county assessor or auditor"
+}
