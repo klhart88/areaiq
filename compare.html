@@ -2,6 +2,16 @@
 
 <html lang="en">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0VPF1V6CKZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-0VPF1V6CKZ');
+</script>
+<link rel="icon" type="image/png" href="/favicon-32x32.png" />
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Compare Areas | AreaIQ by Hart</title>
@@ -327,6 +337,161 @@
       });
     });
   })();
+</script>
+<!-- ═══════════════════════════════════════════════════════════════
+     STEP 1 — Paste inside <head>
+     All CSS variables are resolved to literal values so this works
+     in any site without the AffordabilityIQ stylesheet.
+     ═══════════════════════════════════════════════════════════════ -->
+<style>
+  /* ── Chatbot button pulse ──────────────────────────────────────── */
+  @keyframes chatPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(200,16,46,.55), 0 4px 14px rgba(0,0,0,.18); }
+    70%      { box-shadow: 0 0 0 18px rgba(200,16,46,0), 0 4px 14px rgba(0,0,0,.18); }
+  }
+  [class*="embedded-agent-button"],
+  .embedded-agent-button,
+  #JotformAgent-019438e2115c7445a4fb44e560c787d8bc5a button {
+    animation: chatPulse 2.2s ease-out infinite !important;
+  }
+
+  /* ── Chat nudge tooltip ────────────────────────────────────────── */
+  .chat-nudge {
+    position: fixed;
+    bottom: 96px;
+    right: 24px;
+    background: #FFFFFF;
+    color: #1A0808;
+    border: 2px solid #A30D25;
+    border-radius: 12px;
+    padding: 11px 30px 11px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 6px 20px rgba(0,0,0,.18);
+    z-index: 9998;
+    max-width: 240px;
+    line-height: 1.4;
+    animation: nudgeIn .5s cubic-bezier(.2,.9,.3,1.2) both;
+  }
+  .chat-nudge.hidden { display: none; }
+  .chat-nudge strong { color: #7F0A1C; }
+
+  /* Arrow pointer (bottom-right of tooltip, pointing toward chat button) */
+  .chat-nudge-arrow {
+    position: absolute;
+    bottom: -8px;
+    right: 24px;
+    width: 14px;
+    height: 14px;
+    background: #FFFFFF;
+    border-right: 2px solid #C8102E;
+    border-bottom: 2px solid #C8102E;
+    transform: rotate(45deg);
+  }
+
+  /* Dismiss × button */
+  .chat-nudge-close {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    line-height: 1;
+    color: #756363;
+    cursor: pointer;
+    padding: 0;
+    border-radius: 50%;
+  }
+  .chat-nudge-close:hover { color: #C8102E; background: #F1EEEE; }
+
+  @keyframes nudgeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Responsive overrides ──────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .chat-nudge { bottom: 92px; right: 12px; max-width: 188px; }
+  }
+  @media (max-width: 520px) {
+    .chat-nudge { right: 16px; bottom: 86px; max-width: 200px; font-size: 12px; }
+  }
+</style>
+
+
+
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     STEP 3 — Paste just before </body>
+     JotForm AI chatbot embed (loads the floating chat button)
+     Agent ID: 019438e2115c7445a4fb44e560c787d8bc5a
+     ═══════════════════════════════════════════════════════════════ -->
+<script src="https://cdn.jotfor.ms/agent/embedjs/019438e2115c7445a4fb44e560c787d8bc5a/embed.js"></script>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     STEP 4 — Paste just before </body>, AFTER step 3
+     Chat nudge logic + auto-close guard
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+  // ── Show nudge tooltip ──────────────────────────────────────────────────────
+  // Appears after a 4-second delay, auto-dismisses after 12 seconds.
+  // Respects sessionStorage so it only shows once per browser session.
+  // Call showChatNudge() manually from any event (e.g. form submit) if needed.
+  function showChatNudge() {
+    const nudge = document.getElementById('chat-nudge');
+    if (!nudge) return;
+    try { if (sessionStorage.getItem('chatNudgeDismissed') === '1') return; } catch(e) {}
+    setTimeout(function() {
+      nudge.classList.remove('hidden');
+      setTimeout(function() {
+        if (nudge && !nudge.classList.contains('hidden')) {
+          nudge.style.transition = 'opacity .4s ease';
+          nudge.style.opacity = '0';
+          setTimeout(function() {
+            nudge.classList.add('hidden');
+            nudge.style.opacity = '';
+          }, 420);
+        }
+      }, 12000);
+    }, 4000);
+  }
+
+  // ── Dismiss nudge tooltip ───────────────────────────────────────────────────
+  function dismissChatNudge() {
+    const nudge = document.getElementById('chat-nudge');
+    if (nudge) nudge.classList.add('hidden');
+    try { sessionStorage.setItem('chatNudgeDismissed', '1'); } catch(e) {}
+  }
+
+  // ── Prevent chatbot auto-opening on page load ───────────────────────────────
+  // JotForm sometimes auto-opens the chat window; this closes it silently.
+  (function() {
+    function closeAgentIfOpen() {
+      var windows = document.querySelectorAll(
+        '[class*="embedded-agent-window"], [class*="agent-window"], [class*="chat-window"]'
+      );
+      windows.forEach(function(el) {
+        if (el.offsetHeight > 50) {
+          var closeBtn = el.querySelector('button') ||
+            document.querySelector('[class*="embedded-agent-button"] button');
+          if (closeBtn) closeBtn.click();
+        }
+      });
+    }
+    window.addEventListener('load', function() {
+      setTimeout(closeAgentIfOpen, 1000);
+      setTimeout(closeAgentIfOpen, 2500);
+    });
+  })();
+
+  // ── Auto-fire nudge on page load ────────────────────────────────────────────
+  // Remove or comment this line if you want to trigger it manually instead.
+  showChatNudge();
 </script>
 </body>
 </html>
