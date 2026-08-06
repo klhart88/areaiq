@@ -373,7 +373,6 @@ async function sendToProxy(leadData, context) {
     'Source Page': context.sourcePage,
     'In Indiana': context.location?.state === 'IN',   // real boolean — "In Indiana" is a checkbox field
     'Notes': leadData.lead_notes === '(no notes)' ? '' : leadData.lead_notes,
-    'Captured At': new Date().toISOString(),
     'Request Type': leadData.request_type
   };
 
