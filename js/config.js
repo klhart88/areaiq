@@ -60,8 +60,11 @@ export const EMAILJS_SERVICE_ID = 'service_1qdsjpq';
 export const EMAILJS_TEMPLATE_ID = 'template_3fq6xgm';
 export const EMAILJS_RESULTS_TEMPLATE_ID = 'template_ygnh03j';
 
-// Zapier webhook URL for Airtable lead capture
-export const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/27596963/4y076h6/';
+// Cloudflare Worker proxy URL for Airtable lead capture.
+// The Worker holds the Airtable token server-side (Settings >
+// Variables and Secrets in Cloudflare) so it never ships to
+// the browser. Replaces the old Zapier webhook flow.
+export const AREAIQ_LEAD_PROXY_URL = 'https://areaiq-lead-proxy.klhart88.workers.dev';
 
 // Where lead notifications should be emailed
 export const LEAD_NOTIFICATION_EMAIL = 'khart@fathomrealty.com';
