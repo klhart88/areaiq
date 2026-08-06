@@ -12,8 +12,9 @@
 //    a specific question. Sends you a notification
 //    with the question. Sends them a brief confirmation.
 //
-// Both flows write to Airtable via Zapier with a
-// "Request Type" field distinguishing the two.
+// Both flows write to Airtable via a Cloudflare Worker
+// proxy (areaiq-lead-proxy) with a "Request Type" field
+// distinguishing the two.
 // ============================================
 
 import {
@@ -21,7 +22,7 @@ import {
   EMAILJS_SERVICE_ID,
   EMAILJS_TEMPLATE_ID,
   EMAILJS_RESULTS_TEMPLATE_ID,
-  ZAPIER_WEBHOOK_URL,
+  AREAIQ_LEAD_PROXY_URL,
   LEAD_NOTIFICATION_EMAIL
 } from './config.js';
 
@@ -281,8 +282,8 @@ async function handleLeadSubmit(form, flow, context) {
     promises.push(sendResultsEmail(leadData, context));
   }
 
-  // Send to Zapier (writes to Airtable)
-  promises.push(sendToZapier(leadData, context));
+  // Send to Airtable via the Cloudflare Worker proxy
+  promises.push(sendToProxy(leadData, context));
 
   const results = await Promise.allSettled(promises);
 
@@ -353,29 +354,37 @@ async function sendResultsEmail(leadData, context) {
 
 
 // ============================================
-// Send to Zapier (Airtable CRM)
+// Send to Airtable via Cloudflare Worker proxy
+// ============================================
+//
+// Replaces the old sendToZapier() Zapier-webhook flow.
+// Field names below must exactly match the AreaIQ Leads
+// table columns in Airtable: Email, Name, Phone,
+// Searched Address, Source Page, In Indiana, Notes,
+// Captured At, Request Type.
 // ============================================
 
-async function sendToZapier(leadData, context) {
-  const payload = new URLSearchParams({
-    email: leadData.lead_email,
-    name: leadData.lead_name === '(not provided)' ? '' : leadData.lead_name,
-    phone: leadData.lead_phone === '(not provided)' ? '' : leadData.lead_phone,
-    notes: leadData.lead_notes === '(no notes)' ? '' : leadData.lead_notes,
-    searched_address: leadData.searched_area,
-    source_page: context.sourcePage,
-    request_type: leadData.request_type,
-    in_indiana: context.location?.state === 'IN' ? 'true' : 'false',
-    captured_at: new Date().toISOString()
-  });
+async function sendToProxy(leadData, context) {
+  const fields = {
+    'Email': leadData.lead_email,
+    'Name': leadData.lead_name === '(not provided)' ? '' : leadData.lead_name,
+    'Phone': leadData.lead_phone === '(not provided)' ? '' : leadData.lead_phone,
+    'Searched Address': leadData.searched_area,
+    'Source Page': context.sourcePage,
+    'In Indiana': context.location?.state === 'IN',   // real boolean — "In Indiana" is a checkbox field
+    'Notes': leadData.lead_notes === '(no notes)' ? '' : leadData.lead_notes,
+    'Captured At': new Date().toISOString(),
+    'Request Type': leadData.request_type
+  };
 
-  const response = await fetch(ZAPIER_WEBHOOK_URL, {
+  const response = await fetch(AREAIQ_LEAD_PROXY_URL, {
     method: 'POST',
-    body: payload
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields })
   });
 
   if (!response.ok) {
-    throw new Error(`Zapier returned ${response.status}`);
+    throw new Error(`Proxy returned ${response.status}`);
   }
   return response.json();
 }
