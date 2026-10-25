@@ -23,6 +23,26 @@
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7.1.0/turf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4.4.1/dist/email.min.js"></script>
 <link href="css/styles.css?v=64" rel="stylesheet"/>
+<style>
+/* V5: match and override the more specific existing header contact rules */
+@media (max-width: 900px) {
+  header.top .mobile-menu .mobile-contact-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+  header.top .mobile-menu .mobile-contact-grid > a {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 48px !important;
+    padding: 10px 8px !important;
+    box-sizing: border-box !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+}
+</style>
 </head>
 <body>
 <a aria-hidden="true" class="skip-anchor" id="top"></a>
